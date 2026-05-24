@@ -1,0 +1,9 @@
+export const ALPHA_COLOR = 0xE84D5B;
+export const PHENO_COLOR = 0x9B59B6;
+export const SWARM_COLOR = 0xF1C40F;
+export const COMMAND_SUCCESS_COLOR = 0x00FF00;
+export const COMMAND_ERROR_COLOR = 0xFF0000;
+export const DEFAULT_SCRAPE_INTERVAL_MS = 30000;
+export const DEFAULT_CACHE_TTL_MS = 300000;
+export const DEFAULT_SERVER_PORT = 3000;
+export const ALPHA_SITE_URL = 'https://alpha.pokemmotools.org/';

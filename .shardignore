@@ -1,0 +1,5 @@
+node_modules/
+.git/
+.pencil/
+*.md
+.env
