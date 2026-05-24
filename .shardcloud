@@ -3,4 +3,4 @@ DESCRIPTION=Pokemmo Alpha/Pheno/Swarm Alert Discord Bot
 LANGUAGE=node
 MEMORY=512
 VERSION=recommended
-CUSTOM_COMMAND=bun run src/index.ts
+CUSTOM_COMMAND=npx tsx src/index.ts
