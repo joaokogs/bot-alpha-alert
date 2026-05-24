@@ -50,7 +50,7 @@ async function main(): Promise<void> {
   const alertNotifier = new AlertNotifier(notifier);
   const statusService = new StatusService(cache, notifier);
 
-  const app = createElysiaApp(statusService, notifier);
+  const app = createElysiaApp(statusService, notifier, discordClient, configStore);
 
   app.listen(env.SERVER_PORT, () => {
     console.log(`[Server] Elysia running on port ${env.SERVER_PORT}`);
