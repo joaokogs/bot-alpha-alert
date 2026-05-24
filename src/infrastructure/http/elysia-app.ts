@@ -52,7 +52,7 @@ export function createElysiaApp(
     };
   });
 
-  webhookRoutes(app, notifier);
+  webhookRoutes(app, notifier, discordClient);
 
   return app;
 }

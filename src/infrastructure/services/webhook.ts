@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
+import type { Client } from 'discord.js';
 import type { DiscordNotifier } from '../../domain/ports/discord-port';
 import { PokemonName } from '../../domain/value-objects/pokemon-name';
 import { Timestamp } from '../../domain/value-objects/timestamp';
@@ -41,7 +42,7 @@ function logResponse(method: string, path: string, status: number, body: unknown
   console.log(`[Webhook] ⬅️ ${method} ${path} [${status}]`, JSON.stringify(body));
 }
 
-export function webhookRoutes(app: Elysia, notifier?: DiscordNotifier): void {
+export function webhookRoutes(app: Elysia, notifier?: DiscordNotifier, discordClient?: Client): void {
   // Log de requisições
   app.on('request', (ctx) => {
     console.log(`[HTTP] ${ctx.request.method} ${ctx.request.url}`);
@@ -67,9 +68,12 @@ export function webhookRoutes(app: Elysia, notifier?: DiscordNotifier): void {
       const isAlpha = topic.includes('alpha');
       const type = isAlpha ? 'alpha' : 'swarm';
 
-      console.log(`[Webhook] ✅ ${type} alert received: ${p.pokemon} (${p.location})`);
+      console.log(`[Webhook] ✅ ${type} alert received: ${p.pokemon} (${p.location ?? 'unknown'})`);
 
       // Enviar notificação pro Discord
+      let deliveryStatus = 'skipped';
+      const guildCount = discordClient?.guilds.cache.size ?? 0;
+
       if (notifier?.isReady()) {
         const pokemonName = PokemonName.create(p.pokemon);
 
@@ -115,7 +119,8 @@ export function webhookRoutes(app: Elysia, notifier?: DiscordNotifier): void {
           await notifier.notifySwarm(entity);
         }
 
-        console.log(`[Webhook] 📨 ${type} notification sent to Discord`);
+        deliveryStatus = 'sent';
+        console.log(`[Webhook] 📨 ${type} notification sent to Discord (${guildCount} guild(s) available)`);
       } else {
         console.log(`[Webhook] ⚠️ Discord notifier not ready, skipping notification`);
       }
@@ -127,6 +132,14 @@ export function webhookRoutes(app: Elysia, notifier?: DiscordNotifier): void {
         location: p.location,
         region: p.region,
         topic,
+        discord: {
+          ready: notifier?.isReady() ?? false,
+          guilds: guildCount,
+          delivery: deliveryStatus,
+          hint: deliveryStatus === 'skipped' || guildCount === 0
+            ? '❌ Nenhuma guild disponível ou bot não está pronto. Acesse /debug/guilds para diagnosticar.'
+            : '✅ Webhook processado. Verifique os logs no painel do Shard Cloud.',
+        },
       };
       logResponse('POST', '/webhook/alpha', 200, response);
       return response;
@@ -196,7 +209,7 @@ export function webhookRoutes(app: Elysia, notifier?: DiscordNotifier): void {
   app.post('/webhook/debug', ({ body, set }) => {
     console.log('[Webhook] 🐛 DEBUG - Body recebido:');
     console.log(JSON.stringify(body, null, 2));
-    return { received: true, body };
+    return { received: true, body, guilds: discordClient?.guilds.cache.size ?? 0 };
   });
 
   app.get('/webhook/debug', ({ set }) => {
