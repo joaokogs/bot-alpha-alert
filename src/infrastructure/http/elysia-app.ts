@@ -13,7 +13,6 @@ export function createElysiaApp(
   configStore?: ConfigStore,
 ): Elysia {
   const app = new Elysia({ adapter: node() });
-
   app.get('/health', () => ({
     status: 'ok',
     timestamp: new Date().toISOString(),
