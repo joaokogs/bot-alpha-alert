@@ -25,6 +25,9 @@ const envSchema = z.object({
   SCRAPE_INTERVAL_MS: z.string().default('30000'),
 
   // Servidor HTTP
+  // PORT é o padrão em plataformas cloud (Heroku, Shard Cloud, etc.)
+  // SERVER_PORT é usado como fallback se PORT não estiver definido
+  PORT: z.string().optional(),
   SERVER_PORT: z.string().default('3000'),
 
   // Cache
@@ -47,6 +50,10 @@ export interface Env {
   DISCORD_GUILD_ID?: string;
   ALPHA_SITE_URL: string;
   SCRAPE_INTERVAL_MS: number;
+  /** Porta usada pelo servidor HTTP.
+   *  Prioridade: PORT (cloud) > SERVER_PORT (custom) > 80 (Shard Cloud default) */
+  PORT: number;
+  /** Fallback para PORT — mantido para compatibilidade */
   SERVER_PORT: number;
   CACHE_TTL_MS: number;
   LOG_LEVEL: string;
@@ -81,6 +88,8 @@ export function loadEnv(): Env {
     DISCORD_GUILD_ID: raw.DISCORD_GUILD_ID,
     ALPHA_SITE_URL: raw.ALPHA_SITE_URL,
     SCRAPE_INTERVAL_MS: parseInt(raw.SCRAPE_INTERVAL_MS, 10),
+    // Cloud-first: PORT (padrão cloud) > SERVER_PORT (custom) > 80 (Shard Cloud)
+    PORT: parseInt(raw.PORT || raw.SERVER_PORT || '80', 10),
     SERVER_PORT: parseInt(raw.SERVER_PORT, 10),
     CACHE_TTL_MS: parseInt(raw.CACHE_TTL_MS, 10),
     LOG_LEVEL: raw.LOG_LEVEL,

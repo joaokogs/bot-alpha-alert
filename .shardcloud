@@ -4,4 +4,4 @@ LANGUAGE=node
 MEMORY=512
 VERSION=recommended
 SUBDOMAIN=kaori-alert-alpha
-CUSTOM_COMMAND=npx tsx src/index.ts
+CUSTOM_COMMAND=npm start
